@@ -5,11 +5,16 @@ using System.Text;
 
 namespace SecureFileUpload
 {
-    internal sealed class FileExtensionValidator(IOptions<FileUploadOptions> options)
+    public sealed class FileExtensionValidator : IFileExtensionValidator
     {
-        private static readonly FileUploadOptions _options = options.Value;
+        private readonly FileUploadOptions _options;
 
-        public static bool IsValid(string fileName , HashSet<string> allowedExtensions)
+        public FileExtensionValidator(IOptions<FileUploadOptions> options)
+        {
+            _options = (options ?? throw new ArgumentNullException(nameof(options))).Value;
+        }   
+
+        public bool IsValid(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return false;

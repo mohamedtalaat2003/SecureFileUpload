@@ -11,6 +11,7 @@ namespace SecureFileUpload
         {
             services.AddOptions<FileUploadOptions>().Configure(configureOptions);
             services.AddSingleton<FileExtensionValidator>();
+            services.AddScoped<IFileExtensionValidator, FileExtensionValidator>();
             return services;
         }
     }
