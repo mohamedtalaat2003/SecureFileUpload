@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="SecureFileUpload/SecureFileUpload.csproj" />
+  <Project Path="SecureFileUploadTests/SecureFileUploadTests.csproj" Id="0a940bd0-ef0f-4ede-9c1e-2efce950426b" />
 </Solution>
