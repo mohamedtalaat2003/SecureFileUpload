@@ -30,34 +30,179 @@ namespace SecureFileUploadTests
 
         }
 
-        //public static bool IsValid(string fileName)
-        //{
-        //    if (string.IsNullOrEmpty(fileName))
-        //        return false;
+        [Theory]
+        [InlineData("/")]
+        [InlineData("\\")]
+        [InlineData(":")]
+        [InlineData("\0")]
+        public void FileNameWithUnAllowedPaths_ReturnFalse(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string> { ".jpg", ".png", ".gif" }
+            });
 
-        //    // Reject path-like or malformed names.
-        //    if (fileName.Contains('/') ||
-        //        fileName.Contains('\\') ||
-        //        fileName.Contains(':') ||
-        //        fileName.Contains('\0'))
-        //    {
-        //        return false;
-        //    }
+            var validator = new FileExtensionValidator(options);
 
-        //    var extension = Path.GetExtension(fileName);
+            //act
+            var actual = validator.IsValid(fileName);
 
-        //    // The final extension must be explicitly allowed.
-        //    if (!_options.AllowedExtensions.Contains(extension))
-        //        return false;
+            //assert
+            Assert.False(actual);
+        }
 
-        //    // Reject multiple extensions, e.g. photo.jpg.php.
-        //    var nameWithoutFinalExtension =
-        //        Path.GetFileNameWithoutExtension(fileName);
+        [Theory]
+        [InlineData("photo.jpg.php")]
+        [InlineData("document.pdf.exe")]
+        public void FileNameWithMultipleExtensions_ReturnFalse(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string> { ".jpg", ".png", ".gif" }
+            });
+            var validator = new FileExtensionValidator(options);
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.False(actual);
+        }
 
-        //    if (Path.HasExtension(nameWithoutFinalExtension))
-        //        return false;
 
-        //    return true;
-        //}
+        [Theory]
+        [InlineData("photo.php")]
+        [InlineData("document.exe")]
+        [InlineData("image.bmp")]
+        public void FileNameWithUnAllowedExtensions_ReturnFalse(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string> { ".jpg", ".png", ".gif" }
+            });
+            var validator = new FileExtensionValidator(options);
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.False(actual);
+        }
+
+
+        [Theory]
+        [InlineData("../photo.Php")]
+        [InlineData(@"folder\photo.Exe")]
+        [InlineData("photo.asp:.CPS")]
+        public void FileNameWithUnAllowedExtensionsWithDifferentCase_ReturnFalse(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string> { ".jpg", ".png", ".gif" }
+            });
+            var validator = new FileExtensionValidator(options);
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.False(actual);
+        }
+
+        [Theory]
+        [InlineData("photo.Png")]
+        [InlineData("photo.gIf")]
+        [InlineData("photo.jpg")]
+        [InlineData("photo.Jpg")]
+        public void FileNameWithAllowedExtensionsWithDifferentCase_ReturnTrue(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".png", ".gif" }
+            });
+            var validator = new FileExtensionValidator(options);
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.True(actual);
+        }
+
+        [Theory]
+        [InlineData(".png.jpg")]
+        [InlineData(".jpg.gif")]
+        [InlineData(".Jpg.gif")]
+        public void FileNameWithAllowedExtensionsWithMultipleExtensions_ReturnFalse(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".png", ".gif" }
+            });
+            var validator = new FileExtensionValidator(options);
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.False(actual);
+        }
+
+        [Theory]
+        [InlineData("photo.php.exe")]
+        [InlineData("document.eXe.doc")]
+        public void FileNameWithUnAllowedExtensionsWithMultipleExtensions_ReturnFalse(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".png", ".gif" }
+            });
+            var validator = new FileExtensionValidator(options);
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.False(actual);
+
+        }
+
+        [Theory]
+        [InlineData("photo")]
+        [InlineData("document")]
+        public void FilenameWithoutExtension_ReturnFalse(string fileName)
+        {
+            //arrange
+           var options = Options.Create(new FileUploadOptions
+           {
+               AllowedExtensions = new HashSet<string>{ ".jpg", ".png", ".gif" }
+           });
+
+            var validator = new FileExtensionValidator(options);
+
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.False(actual);
+        }
+
+        [Theory]
+        [InlineData("photo.jpg")]
+        [InlineData("document.png")]
+        [InlineData("image.gif")]
+        public void FilenameWithAllowedExtension_IsValidFunctionRemovedExtension_ReturnTrue(string fileName)
+        {
+            //arrange
+            var options = Options.Create(new FileUploadOptions
+            {
+                AllowedExtensions = new HashSet<string> { ".jpg", ".png", ".gif" }
+            });
+
+            var validator = new FileExtensionValidator(options);
+
+            //act
+            var actual = validator.IsValid(fileName);
+            //assert
+            Assert.True(actual);
+        }
     }
 }
+
+
+    
+

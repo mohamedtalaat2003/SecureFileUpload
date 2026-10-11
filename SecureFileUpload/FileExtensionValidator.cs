@@ -29,10 +29,17 @@ namespace SecureFileUpload
             }
 
             var extension = Path.GetExtension(fileName);
-
+                
             // The final extension must be explicitly allowed.
-            if (!_options.AllowedExtensions.Contains(extension))
+            // Validate against the configured allowlist.
+            if (!_options.AllowedExtensions.Any(
+                allowed => string.Equals(
+                    extension,
+                    allowed,
+                    StringComparison.OrdinalIgnoreCase)))
+            {
                 return false;
+            }
 
             // Reject multiple extensions, e.g. photo.jpg.php.
             var nameWithoutFinalExtension =
